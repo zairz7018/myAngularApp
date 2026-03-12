@@ -1,0 +1,56 @@
+{
+  "students": [
+    {
+      "id": 1,
+      "firstName": "Amina",
+      "lastName": "Diallo",
+      "birthDate": "2002-02-10",
+      "email": "amina.diallo@ecole.fr",
+      "phone": "+221770001122",
+      "address": "Dakar",
+      "classId": 1,
+      "departmentId": 1,
+      "enrollmentDate": "2023-09-01",
+      "status": "actif",
+      "photoUrl": ""
+    },
+    {
+      "id": 2,
+      "firstName": "Jean",
+      "lastName": "Martin",
+      "birthDate": "2001-05-21",
+      "email": "jean.martin@ecole.fr",
+      "phone": "+33610101010",
+      "address": "Lyon",
+      "classId": 2,
+      "departmentId": 2,
+      "enrollmentDate": "2022-09-01",
+      "status": "suspendu",
+      "photoUrl": ""
+    },
+    {
+      "id": 3,
+      "firstName": "Fatou",
+      "lastName": "Ndiaye",
+      "birthDate": "2000-08-14",
+      "email": "fatou.ndiaye@ecole.fr",
+      "phone": "+221781112233",
+      "address": "Thiès",
+      "classId": 1,
+      "departmentId": 3,
+      "enrollmentDate": "2021-09-01",
+      "status": "diplome",
+      "photoUrl": ""
+    }
+  ],
+  "classes": [
+    { "id": 1, "name": "L3-A", "level": "Licence 3" },
+    { "id": 2, "name": "M1-B", "level": "Master 1" }
+  ],
+  "departments": [
+    { "id": 1, "name": "Informatique", "code": "INFO" },
+    { "id": 2, "name": "Mathématiques", "code": "MATH" },
+    { "id": 3, "name": "Réseaux", "code": "NET" }
+  ],
+  "profile": { "email": "admin@school.fr" }
+}
