@@ -1,16 +1,57 @@
 <section class="page-card">
-  <div class="actions">
-    <mat-form-field class="full-width">
+  <h2>Gestion des étudiants</h2>
+
+  @if (loading) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
+
+  <form [formGroup]="filtersForm" class="filters">
+    <mat-form-field>
       <mat-label>Recherche</mat-label>
-      <input matInput (keyup)="applyFilter($any($event.target).value)" placeholder="Nom, email..." />
+      <input matInput formControlName="search" placeholder="Nom, prénom, email..." />
     </mat-form-field>
-    <button mat-raised-button color="primary" routerLink="/students/new">Ajouter</button>
+
+    <mat-form-field>
+      <mat-label>Classe</mat-label>
+      <mat-select formControlName="classId">
+        <mat-option value="all">Toutes les classes</mat-option>
+        @for (item of classes; track item.id) {
+          <mat-option [value]="item.id">{{ item.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Filière</mat-label>
+      <mat-select formControlName="departmentId">
+        <mat-option value="all">Toutes les filières</mat-option>
+        @for (item of departments; track item.id) {
+          <mat-option [value]="item.id">{{ item.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Statut</mat-label>
+      <mat-select formControlName="status">
+        <mat-option value="all">Tous les statuts</mat-option>
+        <mat-option value="actif">Actif</mat-option>
+        <mat-option value="suspendu">Suspendu</mat-option>
+        <mat-option value="diplome">Diplômé</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+
+  <div class="actions">
+    <button mat-raised-button color="primary" routerLink="/students/new">Ajouter un étudiant</button>
   </div>
 
   <table mat-table [dataSource]="dataSource" matSort>
     <ng-container matColumnDef="lastName"><th mat-header-cell *matHeaderCellDef mat-sort-header>Nom</th><td mat-cell *matCellDef="let s">{{ s.lastName }}</td></ng-container>
     <ng-container matColumnDef="firstName"><th mat-header-cell *matHeaderCellDef mat-sort-header>Prénom</th><td mat-cell *matCellDef="let s">{{ s.firstName }}</td></ng-container>
     <ng-container matColumnDef="email"><th mat-header-cell *matHeaderCellDef>Email</th><td mat-cell *matCellDef="let s">{{ s.email }}</td></ng-container>
+    <ng-container matColumnDef="class"><th mat-header-cell *matHeaderCellDef>Classe</th><td mat-cell *matCellDef="let s">{{ className(s.classId) }}</td></ng-container>
+    <ng-container matColumnDef="department"><th mat-header-cell *matHeaderCellDef>Filière</th><td mat-cell *matCellDef="let s">{{ departmentName(s.departmentId) }}</td></ng-container>
     <ng-container matColumnDef="status"><th mat-header-cell *matHeaderCellDef>Statut</th><td mat-cell *matCellDef="let s">{{ s.status }}</td></ng-container>
     <ng-container matColumnDef="enrollmentDate"><th mat-header-cell *matHeaderCellDef mat-sort-header>Inscription</th><td mat-cell *matCellDef="let s">{{ s.enrollmentDate }}</td></ng-container>
     <ng-container matColumnDef="actions">
@@ -23,7 +64,12 @@
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
-  <mat-paginator [pageSize]="5" [pageSizeOptions]="[5,10,20]"></mat-paginator>
+
+  @if (!loading && dataSource.data.length === 0) {
+    <p>Aucun étudiant ne correspond aux filtres.</p>
+  }
+
+  <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]"></mat-paginator>
 </section>
