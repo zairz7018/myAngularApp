@@ -1,17 +1,94 @@
 <mat-card class="page-card">
   <h2>{{ isEdit ? 'Modifier' : 'Ajouter' }} un étudiant</h2>
-  <form [formGroup]="form" (ngSubmit)="save()" class="filters">
-    <mat-form-field><mat-label>Nom</mat-label><input matInput formControlName="lastName"><mat-error>Nom requis</mat-error></mat-form-field>
-    <mat-form-field><mat-label>Prénom</mat-label><input matInput formControlName="firstName"><mat-error>Prénom requis</mat-error></mat-form-field>
-    <mat-form-field><mat-label>Date de naissance</mat-label><input matInput type="date" formControlName="birthDate"></mat-form-field>
-    <mat-form-field><mat-label>Email</mat-label><input matInput formControlName="email"><mat-error>Email invalide</mat-error></mat-form-field>
-    <mat-form-field><mat-label>Téléphone</mat-label><input matInput formControlName="phone"><mat-error>Téléphone invalide</mat-error></mat-form-field>
-    <mat-form-field><mat-label>Adresse</mat-label><input matInput formControlName="address"></mat-form-field>
-    <mat-form-field><mat-label>Classe</mat-label><mat-select formControlName="classId">@for (c of classes; track c.id){<mat-option [value]="c.id">{{ c.name }}</mat-option>}</mat-select></mat-form-field>
-    <mat-form-field><mat-label>Filière</mat-label><mat-select formControlName="departmentId">@for (d of departments; track d.id){<mat-option [value]="d.id">{{ d.name }}</mat-option>}</mat-select></mat-form-field>
-    <mat-form-field><mat-label>Date inscription</mat-label><input matInput type="date" formControlName="enrollmentDate"></mat-form-field>
-    <mat-form-field><mat-label>Statut</mat-label><mat-select formControlName="status"><mat-option value="actif">Actif</mat-option><mat-option value="suspendu">Suspendu</mat-option><mat-option value="diplome">Diplômé</mat-option></mat-select></mat-form-field>
-    <mat-form-field><mat-label>Photo URL</mat-label><input matInput formControlName="photoUrl"></mat-form-field>
-    <button mat-raised-button color="primary" type="submit">Enregistrer</button>
+
+  @if (loading) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="filters" *ngIf="!loading">
+    <mat-form-field>
+      <mat-label>Nom</mat-label>
+      <input matInput formControlName="lastName" />
+      <mat-error *ngIf="form.controls.lastName.touched && form.controls.lastName.invalid">Nom requis</mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Prénom</mat-label>
+      <input matInput formControlName="firstName" />
+      <mat-error *ngIf="form.controls.firstName.touched && form.controls.firstName.invalid">Prénom requis</mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Date de naissance</mat-label>
+      <input matInput type="date" formControlName="birthDate" />
+      <mat-error *ngIf="form.controls.birthDate.touched && form.controls.birthDate.invalid">Date de naissance requise</mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email" />
+      <mat-error *ngIf="form.controls.email.touched && form.controls.email.invalid">Email invalide</mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Téléphone</mat-label>
+      <input matInput formControlName="phone" />
+      <mat-error *ngIf="form.controls.phone.touched && form.controls.phone.invalid">Téléphone invalide</mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Adresse</mat-label>
+      <input matInput formControlName="address" />
+      <mat-error *ngIf="form.controls.address.touched && form.controls.address.invalid">Adresse requise</mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Classe</mat-label>
+      <mat-select formControlName="classId">
+        <mat-option [value]="0">Sélectionner</mat-option>
+        @for (item of classes; track item.id) {
+          <mat-option [value]="item.id">{{ item.name }}</mat-option>
+        }
+      </mat-select>
+      <mat-error *ngIf="form.controls.classId.touched && form.controls.classId.invalid">Classe obligatoire</mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Filière</mat-label>
+      <mat-select formControlName="departmentId">
+        <mat-option [value]="0">Sélectionner</mat-option>
+        @for (item of departments; track item.id) {
+          <mat-option [value]="item.id">{{ item.name }}</mat-option>
+        }
+      </mat-select>
+      <mat-error *ngIf="form.controls.departmentId.touched && form.controls.departmentId.invalid">Filière obligatoire</mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Date d'inscription</mat-label>
+      <input matInput type="date" formControlName="enrollmentDate" />
+      <mat-error *ngIf="form.controls.enrollmentDate.touched && form.controls.enrollmentDate.invalid">Date d'inscription requise</mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Statut</mat-label>
+      <mat-select formControlName="status">
+        <mat-option value="actif">Actif</mat-option>
+        <mat-option value="suspendu">Suspendu</mat-option>
+        <mat-option value="diplome">Diplômé</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Photo (URL optionnelle)</mat-label>
+      <input matInput formControlName="photoUrl" />
+    </mat-form-field>
+
+    <div class="actions">
+      <button mat-raised-button color="primary" type="submit" [disabled]="saving">
+        {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+      </button>
+      <button mat-button type="button" routerLink="/students">Annuler</button>
+    </div>
   </form>
 </mat-card>

@@ -1,19 +1,22 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ApiService } from '../../services/api.service';
 import { SchoolClass } from '../../models/class.model';
 import { Department } from '../../models/department.model';
+import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatProgressBarModule],
   templateUrl: './student-form.component.html'
 })
 export class StudentFormComponent implements OnInit {
@@ -21,10 +24,13 @@ export class StudentFormComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly notification = inject(NotificationService);
 
   classes: SchoolClass[] = [];
   departments: Department[] = [];
   studentId?: number;
+  loading = true;
+  saving = false;
 
   form = this.fb.nonNullable.group({
     firstName: ['', [Validators.required]],
@@ -40,24 +46,54 @@ export class StudentFormComponent implements OnInit {
     photoUrl: ['']
   });
 
-  get isEdit(): boolean { return Boolean(this.studentId); }
+  get isEdit(): boolean {
+    return Boolean(this.studentId);
+  }
 
   ngOnInit(): void {
-    this.api.getClasses().subscribe(c => this.classes = c);
-    this.api.getDepartments().subscribe(d => this.departments = d);
     const id = this.route.snapshot.paramMap.get('id');
+
     if (id) {
       this.studentId = Number(id);
-      this.api.getStudent(this.studentId).subscribe((student) => this.form.patchValue(student));
+      forkJoin({
+        classes: this.api.getClasses(),
+        departments: this.api.getDepartments(),
+        student: this.api.getStudent(this.studentId)
+      }).subscribe(({ classes, departments, student }) => {
+        this.classes = classes;
+        this.departments = departments;
+        this.form.patchValue(student);
+        this.loading = false;
+      });
+      return;
     }
+
+    forkJoin({
+      classes: this.api.getClasses(),
+      departments: this.api.getDepartments()
+    }).subscribe(({ classes, departments }) => {
+      this.classes = classes;
+      this.departments = departments;
+      this.loading = false;
+    });
   }
 
   save(): void {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.saving = true;
     const payload = this.form.getRawValue();
     const request$ = this.isEdit && this.studentId
       ? this.api.updateStudent(this.studentId, payload)
       : this.api.createStudent(payload);
-    request$.subscribe(() => this.router.navigate(['/students']));
+
+    request$.subscribe(() => {
+      this.notification.success(this.isEdit ? 'Étudiant mis à jour' : 'Étudiant créé');
+      this.saving = false;
+      this.router.navigate(['/students']);
+    });
   }
 }
